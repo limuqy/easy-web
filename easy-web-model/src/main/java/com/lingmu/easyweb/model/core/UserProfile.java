@@ -1,6 +1,5 @@
-package com.lingmu.easyweb.core.context;
+package com.lingmu.easyweb.model.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserProfile {
 
     /**

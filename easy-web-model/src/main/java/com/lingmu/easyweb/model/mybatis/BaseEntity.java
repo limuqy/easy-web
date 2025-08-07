@@ -1,7 +1,6 @@
-package com.lingmu.easyweb.mybitis.entity;
+package com.lingmu.easyweb.model.mybatis;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.lingmu.easyweb.core.constant.Constant;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -81,5 +80,5 @@ public class BaseEntity {
      */
     @TableLogic
     @TableField(value = "deleted", fill = FieldFill.INSERT)
-    private Long deleted = Constant.UNDELETED_FLAG;
+    private Long deleted = 0L;
 }

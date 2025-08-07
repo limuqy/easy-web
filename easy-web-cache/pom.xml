@@ -12,12 +12,11 @@
     <artifactId>easy-web-cache</artifactId>
     <name>easy-web-cache</name>
     <description>easy-web-cache</description>
-    <version>1.0.1</version>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>8</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -25,6 +24,10 @@
         <dependency>
             <groupId>com.lingmu.easyweb</groupId>
             <artifactId>easy-web-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lingmu.easyweb</groupId>
+            <artifactId>easy-web-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

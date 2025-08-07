@@ -9,6 +9,7 @@
         <module>easy-web-excel</module>
         <module>easy-web-mybatis</module>
         <module>easy-web-cache</module>
+        <module>easy-web-model</module>
     </modules>
     <groupId>com.lingmu.easyweb</groupId>
     <artifactId>easy-web</artifactId>
@@ -17,9 +18,9 @@
 
     <properties>
         <app.version>1.0.1</app.version>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>8</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <hutool.version>5.8.26</hutool.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <fastexcel.version>1.2.0</fastexcel.version>
@@ -30,6 +31,7 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <springboot.version>2.7.18</springboot.version>
         <lombok.version>1.18.38</lombok.version>
+        <springcore.version>5.3.31</springcore.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -55,7 +57,11 @@
                 <artifactId>easy-web-cache</artifactId>
                 <version>${app.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.lingmu.easyweb</groupId>
+                <artifactId>easy-web-model</artifactId>
+                <version>${app.version}</version>
+            </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
@@ -83,6 +89,11 @@
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot-autoconfigure</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
@@ -97,6 +108,11 @@
                 <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${springcore.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-json</artifactId>
                 <version>${springboot.version}</version>
@@ -104,6 +120,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${springboot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-commons</artifactId>
                 <version>${springboot.version}</version>
             </dependency>
             <dependency>
@@ -120,6 +141,11 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>${springboot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -9,12 +9,11 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>easy-web-mybatis</artifactId>
-    <name>easy-web-mybatis</name>
-    <description>easy-web-mybatis</description>
+    <artifactId>easy-web-model</artifactId>
+    <name>easy-web-model</name>
+    <description>easy-web-model</description>
 
     <properties>
-        <java.version>8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,23 +21,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.lingmu.easyweb</groupId>
-            <artifactId>easy-web-core</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot-autoconfigure</artifactId>
-            <scope>compile</scope>
+            <artifactId>mybatis-plus-annotation</artifactId>
         </dependency>
     </dependencies>
 

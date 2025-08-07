@@ -1,7 +1,7 @@
 package com.lingmu.easyweb.cache.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.lingmu.easyweb.cache.entity.DictValueEntity;
+import com.lingmu.easyweb.model.cache.DictValueEntity;
 import com.lingmu.easyweb.cache.template.CacheTemplate;
 import com.lingmu.easyweb.core.util.CollectionUtil;
 import com.lingmu.easyweb.core.util.StringUtil;

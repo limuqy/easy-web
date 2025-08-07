@@ -2,6 +2,7 @@ package com.lingmu.easyweb.core.context;
 
 import com.lingmu.easyweb.core.constant.Constant;
 import com.lingmu.easyweb.core.util.StringUtil;
+import com.lingmu.easyweb.model.core.UserProfile;
 
 import java.util.ArrayList;
 import java.util.List;

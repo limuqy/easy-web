@@ -1,4 +1,4 @@
-package com.lingmu.easyweb.cache.entity;
+package com.lingmu.easyweb.model.cache;
 
 import lombok.Getter;
 import lombok.Setter;
