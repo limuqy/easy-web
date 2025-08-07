@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.lingmu.easyweb.mybitis.handler.AutoFillHandler,\
+com.lingmu.easyweb.mybitis.config.MybatisPlusConfiguration
