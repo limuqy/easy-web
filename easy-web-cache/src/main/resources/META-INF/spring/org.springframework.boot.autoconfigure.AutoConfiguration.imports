@@ -1,2 +1,2 @@
-com.lingmu.easyweb.cache.config.RedisConfiguration
-com.lingmu.easyweb.cache.template.CacheTemplate
+io.github.limuqy.easyweb.cache.config.RedisConfiguration
+io.github.limuqy.easyweb.cache.template.CacheTemplate

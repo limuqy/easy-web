@@ -11,7 +11,7 @@
         <module>easy-web-cache</module>
         <module>easy-web-model</module>
     </modules>
-    <groupId>com.lingmu.easyweb</groupId>
+    <groupId>io.github.limuqy</groupId>
     <artifactId>easy-web</artifactId>
     <version>1.0.1</version>
     <description>easy-web</description>
@@ -38,27 +38,27 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.lingmu.easyweb</groupId>
+                <groupId>io.github.limuqy</groupId>
                 <artifactId>easy-web-core</artifactId>
                 <version>${app.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lingmu.easyweb</groupId>
+                <groupId>io.github.limuqy</groupId>
                 <artifactId>easy-web-excel</artifactId>
                 <version>${app.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lingmu.easyweb</groupId>
+                <groupId>io.github.limuqy</groupId>
                 <artifactId>easy-web-mybatis</artifactId>
                 <version>${app.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lingmu.easyweb</groupId>
+                <groupId>io.github.limuqy</groupId>
                 <artifactId>easy-web-cache</artifactId>
                 <version>${app.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lingmu.easyweb</groupId>
+                <groupId>io.github.limuqy</groupId>
                 <artifactId>easy-web-model</artifactId>
                 <version>${app.version}</version>
             </dependency>
