@@ -15,22 +15,30 @@ import java.lang.annotation.*;
 @JsonSerialize(using = DataDictionarySerializerHandler.class)
 public @interface DataDictionary {
     /**
-     * 字典编码
+     * 字典编码和dictCode等效
+     *
+     * @return 字典编码
      */
     String value() default "";
 
     /**
      * 字典编码
+     *
+     * @return 字典编码
      */
     String dictCode() default "";
 
     /**
-     * 字段名后缀
+     * 字段名后缀 默认Meaning
+     *
+     * @return 字段名后缀
      */
     String suffix() default "Meaning";
 
     /**
-     * 分割形字段， 如code1;code2;code3
+     * 分割形字段， 如code1;code2;code3，默认不分割
+     *
+     * @return 分割符
      */
     String split() default "";
 }

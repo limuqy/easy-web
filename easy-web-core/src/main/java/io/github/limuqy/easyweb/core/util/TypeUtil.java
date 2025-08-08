@@ -36,6 +36,10 @@ public class TypeUtil {
 
     /**
      * 将对象转换成指定类型
+     * @param value 对象
+     * @param target 转换的类型Class
+     * @return 转换后对应类型的对象
+     * @param <T> 转换后的对象类型
      */
     public static <T> T convert(Object value, Class<T> target) {
         if (value == null) {
@@ -91,6 +95,8 @@ public class TypeUtil {
 
     /**
      * Integer转换
+     * @param value 对象
+     * @return 数值
      */
     public static Integer integerConvert(Object value) {
         if (value == null) {
@@ -196,6 +202,8 @@ public class TypeUtil {
 
     /**
      * druid数据源clob转换
+     * @param rawClob 数据库clob数据
+     * @return clob数据的字符串
      */
     private static String druidClobToString(Object rawClob) {
         try {
@@ -337,7 +345,9 @@ public class TypeUtil {
 
 
     /**
-     * bool值转换
+     * 布尔值转换
+     * @param value 对象
+     * @return 布尔值
      */
     private static Object booleanConvert(Object value) {
         boolean result = false;
@@ -371,6 +381,8 @@ public class TypeUtil {
 
     /**
      * 判断是否是基本类型
+     * @param clazz 对象类型Class
+     * @return 是否是基本类型
      */
     public static boolean isBasicType(Class<?> clazz) {
         return clazz == Integer.class

@@ -34,9 +34,9 @@ public class SimpleExport<T> {
     /**
      * @param clazz 实际导出的类
      * @param <T>   实际导出的类型
-     * @param <M>   分页查询的类型
+     * @return this
      */
-    public static <T, M> SimpleExport<T> build(Class<T> clazz) {
+    public static <T> SimpleExport<T> build(Class<T> clazz) {
         return new SimpleExport<>(clazz);
     }
 
@@ -49,6 +49,7 @@ public class SimpleExport<T> {
      * 设置输出流
      *
      * @param outputStream 输出流
+     * @return this
      */
     public SimpleExport<T> out(OutputStream outputStream) {
         this.outputStream = outputStream;
@@ -59,6 +60,7 @@ public class SimpleExport<T> {
      * 查询数据
      *
      * @param listQuery 查询获取后续数据
+     * @return this
      */
     public SimpleExport<T> query(Func2<Integer, Integer, List<T>> listQuery) {
         this.listQuery = listQuery;
@@ -66,7 +68,10 @@ public class SimpleExport<T> {
     }
 
     /**
-     * 对查询结果集处理
+     * 设置导出对象包含列
+     *
+     * @param includeColumnFieldNames 包含列的字段名称
+     * @return this
      */
     public SimpleExport<T> include(Collection<String> includeColumnFieldNames) {
         this.includeColumnFieldNames = includeColumnFieldNames;
@@ -74,7 +79,10 @@ public class SimpleExport<T> {
     }
 
     /**
-     * 对查询结果集处理
+     * 设置导出对象排除列
+     *
+     * @param excludeColumnFieldNames 排除列的字段名称
+     * @return this
      */
     public SimpleExport<T> exclude(Collection<String> excludeColumnFieldNames) {
         this.excludeColumnFieldNames = excludeColumnFieldNames;

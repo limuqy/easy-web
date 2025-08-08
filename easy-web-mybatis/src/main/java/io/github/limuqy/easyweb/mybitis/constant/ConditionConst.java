@@ -6,7 +6,7 @@ public class ConditionConst {
      */
     public static final String EQ = "eq";
     /**
-     * 不等于 <>
+     * 不等于 &lt;&gt;
      */
     public static final String NE = "ne";
     /**
@@ -42,19 +42,19 @@ public class ConditionConst {
      */
     public static final String NIN = "notIn";
     /**
-     * 大于 >
+     * 大于 &gt;
      */
     public static final String GT = "gt";
     /**
-     * 大于等于 >=
+     * 大于等于 &gt;=
      */
     public static final String GE = "ge";
     /**
-     * 小于 <
+     * 小于 &lt;
      */
     public static final String LT = "lt";
     /**
-     * 小于等于 <=
+     * 小于等于 &lt;=
      */
     public static final String LE = "le";
     /**

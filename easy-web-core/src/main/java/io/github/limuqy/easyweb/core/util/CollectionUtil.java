@@ -34,6 +34,7 @@ public class CollectionUtil extends CollUtil {
      * @param list        集合
      * @param requireSize 所需大小
      * @param <T>         泛型
+     * @return 获取的集合
      */
     public static <T> List<T> getRandomList(List<T> list, int requireSize) {
         if (list == null || list.isEmpty() || requireSize <= 0) {

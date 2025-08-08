@@ -162,6 +162,8 @@ public class PageQueryUtil {
 
     /**
      * 使用like时，进行value转义
+     * @param value like值
+     * @return 转义后的值
      */
     public static String escapeSpecialChar(String value) {
         if (StringUtil.isBlank(value)) {

@@ -48,6 +48,8 @@ public class DateUtil extends cn.hutool.core.date.DateUtil {
 
     /**
      * 获取当前时间戳
+     *
+     * @return 当前的时间戳
      */
     public static Timestamp timestamp() {
         return new Timestamp(System.currentTimeMillis());

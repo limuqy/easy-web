@@ -92,9 +92,11 @@ public class CacheTemplate {
     /**
      * 普通缓存放入并设置时间
      *
-     * @param key   键
-     * @param value 值
-     * @param time  时间(秒) time要大于0 如果time小于等于0 将设置无限期
+     * @param module   module
+     * @param key      键
+     * @param value    值
+     * @param time     时间（秒） time要大于0 如果time小于等于0 将设置无限期
+     * @param timeUnit 时间类型
      */
     public void put(String module, String key, Object value, Long time, TimeUnit timeUnit) {
         if (Objects.nonNull(value) && !TypeUtil.isBasicType(value.getClass())) {
@@ -135,6 +137,12 @@ public class CacheTemplate {
 
     /**
      * 重新设置key的值，可以用于锁(过期时间默认按秒)
+     *
+     * @param module module
+     * @param key    键
+     * @param value  值
+     * @param time   时间(秒) time要大于0 如果time小于等于0 将设置无限期
+     * @return 是否存在
      */
     public boolean setIfAbsent(String module, String key, Object value, long time) {
         return this.setIfAbsent(module, key, value, time, TimeUnit.SECONDS);
@@ -142,6 +150,13 @@ public class CacheTemplate {
 
     /**
      * 重新设置key的值，可以用于锁
+     *
+     * @param module   module
+     * @param key      键
+     * @param value    值
+     * @param time     时间 time要大于0 如果time小于等于0 将设置无限期
+     * @param timeUnit 时间类型
+     * @return 是否存在
      */
     public boolean setIfAbsent(String module, String key, Object value, long time, TimeUnit timeUnit) {
         return this.setIfAbsent(this.cacheKey(module, key), value, time, timeUnit);
@@ -153,6 +168,11 @@ public class CacheTemplate {
 
     /**
      * 重新设置key的值，可以用于锁(不删除的话，当前锁永不过期)
+     *
+     * @param module module
+     * @param key    键
+     * @param value  值
+     * @return 是否存在
      */
     public boolean setIfAbsent(String module, String key, Object value) {
         return this.setIfAbsent(this.cacheKey(module, key), value, -1, TimeUnit.SECONDS);
@@ -161,6 +181,7 @@ public class CacheTemplate {
     /**
      * 获取下一个唯一ID
      *
+     * @param module    module
      * @param keyPrefix 这个key 可以看做是业务key，不同的业务对应不同的key
      * @return 唯一序列ID
      */
@@ -175,8 +196,9 @@ public class CacheTemplate {
     /**
      * 指定缓存失效时间
      *
-     * @param key  键
-     * @param time 时间(秒)
+     * @param module module
+     * @param key    键
+     * @param time   时间(秒)
      * @return true:设置成功，false：设置失败
      */
     public boolean expire(String module, String key, long time) {
@@ -186,6 +208,7 @@ public class CacheTemplate {
     /**
      * 指定缓存失效时间
      *
+     * @param module   module
      * @param key      键
      * @param time     时间(秒)
      * @param timeUnit 时间单位

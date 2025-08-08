@@ -25,6 +25,8 @@ public class StringUtil extends StringUtils {
 
     /**
      * 驼峰转下划线
+     * @param name 驼峰名称
+     * @return 下划线名称
      */
     public static String camelConvert(String name) {
         return name != null && !name.contains("_") ? upper2Underline(name) : name;
@@ -32,6 +34,8 @@ public class StringUtil extends StringUtils {
 
     /**
      * 下划线转驼峰
+     * @param name 下划线名称
+     * @return 驼峰名称
      */
     public static String toCamelCase(String name) {
         return StrUtil.toCamelCase(name);
@@ -39,6 +43,8 @@ public class StringUtil extends StringUtils {
 
     /**
      * 驼峰转下划线
+     * @param name 驼峰名称
+     * @return 下划线名称
      */
     public static String upper2Underline(String name) {
         return StrUtil.toUnderlineCase(name);
@@ -46,6 +52,8 @@ public class StringUtil extends StringUtils {
 
     /**
      * 全角转半角
+     * @param fullWidthStr 全角字符串
+     * @return 半角字符串
      */
     public static String fullWidthToHalfWidth(String fullWidthStr) {
         if (fullWidthStr == null) {
@@ -62,6 +70,9 @@ public class StringUtil extends StringUtils {
 
     /**
      * 半角转全角
+     *
+     * @param halfWidthStr 待处理字符串
+     * @return 全角字符串
      */
     public static String halfWidthToFullWidth(String halfWidthStr) {
         if (halfWidthStr == null) {
@@ -133,6 +144,9 @@ public class StringUtil extends StringUtils {
 
     /**
      * 首字母变大写
+     *
+     * @param value 待处理字符串
+     * @return 首字母大写字符串
      */
     public static String getFirstUpperCaseString(String value) {
         if (!value.isEmpty()) {
@@ -147,6 +161,9 @@ public class StringUtil extends StringUtils {
 
     /**
      * 首字母变小写
+     *
+     * @param value 待处理字符串
+     * @return 首字母小写字符串
      */
     public static String getFirstLowerCaseString(String value) {
         if (!value.isEmpty()) {
@@ -162,6 +179,9 @@ public class StringUtil extends StringUtils {
 
     /**
      * 获取第一个不为空的数据值
+     *
+     * @param arr 需要获取的值
+     * @return 返回第一个不为空的值
      */
     public static String getNotEmpty(String... arr) {
         return ObjectUtil.getNotEmpty(arr);
@@ -172,6 +192,7 @@ public class StringUtil extends StringUtils {
      * 检查编码是否符合规则
      *
      * @param text 待校验字符串
+     * @return 是否符合
      */
     public static boolean checkCodeFormat(String text) {
         if (isBlank(text)) {
@@ -187,6 +208,7 @@ public class StringUtil extends StringUtils {
      * 检查排序是否符合规则
      *
      * @param text 待校验字符串
+     * @return 是否符合
      */
     public static boolean checkSortFormat(String text) {
         if (isBlank(text)) {
@@ -200,24 +222,30 @@ public class StringUtil extends StringUtils {
 
     /**
      * 将文件中的特殊字符转换成全角
+     *
+     * @param value 待转换字符串
+     * @return 转换后的值
      */
     public static String toFullWidth(String value) {
         if (isEmpty(value)) {
             return value;
         }
-        return value.replaceAll("\\\\", "＼")
-                .replaceAll("/", "／")
-                .replaceAll(":", "：")
-                .replaceAll("\\*", "＊")
-                .replaceAll("\\?", "？")
-                .replaceAll("<", "＜")
-                .replaceAll(">", "＞")
-                .replaceAll("\\|", "｜")
-                .replaceAll("\"", "");
+        return value.replace("\\\\", "＼")
+                .replace("/", "／")
+                .replace(":", "：")
+                .replace("\\*", "＊")
+                .replace("\\?", "？")
+                .replace("<", "＜")
+                .replace(">", "＞")
+                .replace("\\|", "｜")
+                .replace("\"", "");
     }
 
     /**
      * 去除字符串中重复的空白换行
+     *
+     * @param s 待处理字符串
+     * @return 处理后的字符串
      */
     public static String trimFullString(String s) {
         if (isEmpty(s)) {

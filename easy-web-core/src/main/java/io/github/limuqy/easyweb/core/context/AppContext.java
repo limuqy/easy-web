@@ -14,6 +14,8 @@ public class AppContext {
 
     /**
      * 获取当前上下文用户信息
+     *
+     * @return 当前上下文用户信息
      */
     public static UserProfile getUserProfile() {
         return userProfile.get();
@@ -21,6 +23,8 @@ public class AppContext {
 
     /**
      * 获取当前登录用户工号
+     *
+     * @return 用户工号
      */
     public static String getEmployeeCode() {
         UserProfile profile = userProfile.get();
@@ -29,6 +33,8 @@ public class AppContext {
 
     /**
      * 获取当前登录用户姓名
+     *
+     * @return 用户名
      */
     public static String getEmployeeName() {
         UserProfile profile = userProfile.get();
@@ -36,7 +42,9 @@ public class AppContext {
     }
 
     /**
-     * 获取当前登录用户姓名(工号)
+     * 获取当前登录用户姓名(工号)，例如：小明(1234)
+     *
+     * @return 用户姓名(工号)
      */
     public static String getEmployeeNameJointCode() {
         UserProfile profile = userProfile.get();
@@ -61,6 +69,8 @@ public class AppContext {
 
     /**
      * 获取当前上下文用户组织
+     *
+     * @return 组织编码
      */
     public static String getOrgCode() {
         UserProfile profile = userProfile.get();
@@ -69,6 +79,8 @@ public class AppContext {
 
     /**
      * 获取当前上下文用户角色
+     *
+     * @return 角色编码集合
      */
     public static List<String> getRoleCodes() {
         UserProfile profile = userProfile.get();
@@ -77,6 +89,8 @@ public class AppContext {
 
     /**
      * 判断是否超级管理员
+     *
+     * @return 是否超级管理员
      */
     public static boolean isSuperAdmin() {
         UserProfile profile = userProfile.get();
@@ -85,6 +99,8 @@ public class AppContext {
 
     /**
      * 判断当前用户是否匿名
+     *
+     * @return 是否匿名
      */
     public static boolean isAnonymous() {
         return getUserProfile() == null;
@@ -92,6 +108,8 @@ public class AppContext {
 
     /**
      * 设置当前上下文用户信息
+     *
+     * @param userProfile 上下文用户信息
      */
     public static void setUserProfile(UserProfile userProfile) {
         AppContext.userProfile.set(userProfile);
