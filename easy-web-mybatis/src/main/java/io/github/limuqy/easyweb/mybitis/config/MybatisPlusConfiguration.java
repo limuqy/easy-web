@@ -2,7 +2,6 @@ package io.github.limuqy.easyweb.mybitis.config;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
@@ -16,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,9 @@ import java.util.List;
 @EnableConfigurationProperties({MybatisPlusProperties.class, DataSourceProperties.class})
 @RequiredArgsConstructor
 public class MybatisPlusConfiguration {
-    private final AutoFillHandler autoFillHandler;
-    private final MybatisPlusProperties mybatisPlusProperties;
-    private final DataSourceProperties dataSourceProperties;
 
     @Bean
-    public GlobalConfig globalConfig() {
+    public GlobalConfig globalConfig(AutoFillHandler autoFillHandler, MybatisPlusProperties mybatisPlusProperties) {
         GlobalConfig conf = mybatisPlusProperties.getGlobalConfig();
         conf.setMetaObjectHandler(autoFillHandler);
         conf.setIdentifierGenerator(new DefaultIdentifierGenerator(RandomUtil.randomLong(1, 31), RandomUtil.randomLong(1, 31)));
@@ -50,10 +48,10 @@ public class MybatisPlusConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        log.info("DB driver-class-name : {}", dataSourceProperties.getType().getName());
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         return interceptor;
     }
