@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.limuqy</groupId>
         <artifactId>easy-web</artifactId>
-        <version>1.0.0-beta</version>
+        <version>1.0.0-beta-3</version>
     </parent>
 
     <artifactId>easy-web-excel</artifactId>
