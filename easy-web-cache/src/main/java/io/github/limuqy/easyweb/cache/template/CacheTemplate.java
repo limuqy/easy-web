@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CacheTemplate {
 
-    private final StringRedisTemplate getRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     public String getString(String module, String key) {
         return get(module, key, String.class);
@@ -50,7 +50,7 @@ public class CacheTemplate {
     private Long getIncrement(String module, String key, long delta, int timeout, TimeUnit timeUnit) {
         Long value;
         try {
-            value = getRedisTemplate.opsForHash().increment(cacheModule(module), key, delta);
+            value = stringRedisTemplate.opsForHash().increment(cacheModule(module), key, delta);
             expire(cacheKey(module, key), timeout, timeUnit);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -64,7 +64,7 @@ public class CacheTemplate {
 
     public <T> T get(String module, String key, Class<T> clazz) {
         T result;
-        Object value = getRedisTemplate.opsForHash().get(cacheModule(module), key);
+        Object value = stringRedisTemplate.opsForHash().get(cacheModule(module), key);
         //基本类型
         if (TypeUtil.isBasicType(clazz)) {
             result = TypeUtil.convert(value, clazz);
@@ -76,7 +76,7 @@ public class CacheTemplate {
 
     public <T> T get(String module, String key, TypeReference<T> type) {
         T result;
-        Object value = getRedisTemplate.opsForHash().get(cacheModule(module), key);
+        Object value = stringRedisTemplate.opsForHash().get(cacheModule(module), key);
         result = JsonUtil.parseObject(String.valueOf(value), type);
         return result;
     }
@@ -103,15 +103,15 @@ public class CacheTemplate {
             value = JsonUtil.toJSONString(value);
         }
         if (time != null && time > 0) {
-            getRedisTemplate.opsForHash().put(cacheModule(module), key, value);
+            stringRedisTemplate.opsForHash().put(cacheModule(module), key, value);
             expire(cacheModule(module), key, time, ObjectUtil.getNotEmptyElse(timeUnit, TimeUnit.MINUTES));
         } else {
-            getRedisTemplate.opsForHash().put(cacheModule(module), key, value);
+            stringRedisTemplate.opsForHash().put(cacheModule(module), key, value);
         }
     }
 
     public void delete(String module, String... keys) {
-        getRedisTemplate.opsForHash().delete(this.cacheModule(module), (Object[]) keys);
+        stringRedisTemplate.opsForHash().delete(this.cacheModule(module), (Object[]) keys);
     }
 
     public void deleteByValue(String module, String key, String value) {
@@ -163,7 +163,7 @@ public class CacheTemplate {
     }
 
     private boolean setIfAbsent(String key, Object value, long time, TimeUnit timeUnit) {
-        return Boolean.TRUE.equals(getRedisTemplate.opsForValue().setIfAbsent(key, String.valueOf(value), time, timeUnit));
+        return Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, String.valueOf(value), time, timeUnit));
     }
 
     /**
@@ -190,7 +190,7 @@ public class CacheTemplate {
             throw new BusinessException("business key can not empty！");
         }
         // 2.2 自增长
-        return getRedisTemplate.opsForHash().increment(this.cacheModule(module), keyPrefix, 1);
+        return stringRedisTemplate.opsForHash().increment(this.cacheModule(module), keyPrefix, 1);
     }
 
     /**
@@ -221,7 +221,7 @@ public class CacheTemplate {
     private boolean expire(String key, long time, TimeUnit timeUnit) {
         try {
             if (time > 0) {
-                getRedisTemplate.opsForHash().getOperations().expire(key, time, ObjectUtil.getNotEmptyElse(timeUnit, TimeUnit.MINUTES));
+                stringRedisTemplate.opsForHash().getOperations().expire(key, time, ObjectUtil.getNotEmptyElse(timeUnit, TimeUnit.MINUTES));
             }
             return true;
         } catch (Exception e) {
@@ -231,7 +231,7 @@ public class CacheTemplate {
     }
 
     public Long getExpire(String module, String key, TimeUnit timeUnit) {
-        return getRedisTemplate.opsForHash().getOperations().getExpire(this.cacheKey(module, key), timeUnit);
+        return stringRedisTemplate.opsForHash().getOperations().getExpire(this.cacheKey(module, key), timeUnit);
     }
 
     public long getExpire(String module, String key) {

@@ -3,6 +3,7 @@ package io.github.limuqy.easyweb.core.util;
 import io.github.limuqy.easyweb.core.context.AppContext;
 import io.github.limuqy.easyweb.model.core.UserProfile;
 import lombok.NonNull;
+import org.slf4j.MDC;
 
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -36,7 +37,11 @@ public class ThreadUtil {
 
     public static <T> Callable<T> wrap(final Callable<T> callable) {
         UserProfile userProfile = AppContext.getUserProfile();
+        String traceId = TraceIdUtil.getTraceId();
         return () -> {
+            if (StringUtil.isNoneBlank(traceId)) {
+                TraceIdUtil.setTraceId(traceId);
+            }
             AppContext.setUserProfile(userProfile);
             return callable.call();
         };
@@ -44,7 +49,11 @@ public class ThreadUtil {
 
     public static Runnable wrap(final Runnable runnable) {
         UserProfile userProfile = AppContext.getUserProfile();
+        String traceId = TraceIdUtil.getTraceId();
         return () -> {
+            if (StringUtil.isNoneBlank(traceId)) {
+                TraceIdUtil.setTraceId(traceId);
+            }
             AppContext.setUserProfile(userProfile);
             runnable.run();
         };
