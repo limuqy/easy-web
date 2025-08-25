@@ -1,16 +1,17 @@
 package io.github.limuqy.easyweb.mybitis.util;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.limuqy.easyweb.mybitis.constant.ConditionConst;
-import io.github.limuqy.easyweb.core.util.BeanUtil;
-import io.github.limuqy.easyweb.core.util.CollectionUtil;
-import io.github.limuqy.easyweb.core.util.StringUtil;
-import io.github.limuqy.easyweb.core.util.TypeUtil;
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
+import io.github.limuqy.easyweb.core.annotation.RowId;
+import io.github.limuqy.easyweb.core.exception.RowIdException;
+import io.github.limuqy.easyweb.core.util.*;
 import io.github.limuqy.easyweb.mybitis.base.QueryParam;
 import io.github.limuqy.easyweb.mybitis.base.QueryRequest;
 import io.github.limuqy.easyweb.mybitis.base.SortParam;
+import io.github.limuqy.easyweb.mybitis.constant.ConditionConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ public class PageQueryUtil {
     private PageQueryUtil() {
     }
 
-    public static void doSimpleWrapper(QueryRequest queryRequest, QueryWrapper<?> wrapper) {
+    public static void doSimpleWrapper(QueryRequest queryRequest, AbstractWrapper<?, String, ?> wrapper) {
         Class<?> clazz = wrapper.getEntityClass();
-        List<Field> list = BeanUtil.getEntityClassField(wrapper.getEntityClass());
+        List<Field> list = BeanUtil.getEntityClassField(clazz);
         for (QueryParam queryParam : queryRequest.getParams()) {
             String fieldName = StringUtil.upper2Underline(queryParam.getName());
             Field field = list.stream()
@@ -106,6 +107,20 @@ public class PageQueryUtil {
                 case ConditionConst.NN:
                     wrapper.isNotNull(fieldName);
                     break;
+                case ConditionConst.OR_RLK:
+                    // 查询全路径下的子类数据时，做特殊处理，进行或查询
+                    List<String> orLikeRightList = getValue(queryParam.getValues(), field, clazz);
+                    if (CollUtil.isNotEmpty(orLikeRightList)) {
+                        wrapper.and(consumer -> orLikeRightList.forEach(fullCodes -> consumer.or().likeRight(fieldName, fullCodes)));
+                    }
+                    break;
+                case ConditionConst.OR_LK:
+                    // 查询全路径下的子类数据时，做特殊处理，进行或查询
+                    List<String> roLikeList = getValue(queryParam.getValues(), field, clazz);
+                    if (CollUtil.isNotEmpty(roLikeList)) {
+                        wrapper.and(consumer -> roLikeList.forEach(fullCodes -> consumer.or().like(fieldName, fullCodes)));
+                    }
+                    break;
                 default:
                     break;
             }
@@ -117,7 +132,7 @@ public class PageQueryUtil {
         logger.debug(QUERY_PARAM_MESSAGE, queryParam.getName(), queryParam.getOp(), isValues ? queryParam.getValues() : queryParam.getValue());
     }
 
-    public static void doSortWrapper(QueryRequest queryRequest, QueryWrapper<?> wrapper) {
+    public static void doSortWrapper(QueryRequest queryRequest, AbstractWrapper<?, String, ?> wrapper) {
         if (CollectionUtil.isAllEmpty(queryRequest.getSorts())) {
             return;
         }
@@ -142,6 +157,17 @@ public class PageQueryUtil {
         if (field == null) {
             return value;
         }
+        if (!RowIdUtil.isDisable()) {
+            RowId rowId = field.getAnnotation(RowId.class);
+            if (rowId != null) {
+                try {
+                    return RowIdUtil.decryptRowId(value, RowIdUtil.getEntityTableName(rowId, clazz));
+                } catch (RowIdException e) {
+                    e.mappingErr(String.format("QueryRequest.param.%s", field.getName()), clazz, field.getName());
+                    throw e;
+                }
+            }
+        }
         if (Collection.class.isAssignableFrom(field.getType())) {
             return TypeUtil.convert(value, cn.hutool.core.util.TypeUtil.getClass(cn.hutool.core.util.TypeUtil.getTypeArgument(field.getGenericType(), 0)));
         }
@@ -162,6 +188,7 @@ public class PageQueryUtil {
 
     /**
      * 使用like时，进行value转义
+     *
      * @param value like值
      * @return 转义后的值
      */

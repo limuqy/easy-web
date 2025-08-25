@@ -8,6 +8,11 @@ import lombok.Setter;
 public class ErrorException extends RuntimeException {
     private String msg;
 
+    public ErrorException(Throwable cause) {
+        super(cause);
+        this.msg = "系统异常";
+    }
+
     public ErrorException(Throwable cause, String message, Object... params) {
         super(String.format(message, params), cause);
         this.msg = String.format(message, params);

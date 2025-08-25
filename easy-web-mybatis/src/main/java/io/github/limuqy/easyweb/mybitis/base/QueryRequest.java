@@ -1,14 +1,15 @@
 package io.github.limuqy.easyweb.mybitis.base;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import io.github.limuqy.easyweb.mybitis.constant.ConditionConst;
 import io.github.limuqy.easyweb.core.function.QSupplier;
 import io.github.limuqy.easyweb.core.util.CollectionUtil;
 import io.github.limuqy.easyweb.core.util.LambdaUtil;
-import io.github.limuqy.easyweb.mybitis.util.PageQueryUtil;
 import io.github.limuqy.easyweb.core.util.StringUtil;
+import io.github.limuqy.easyweb.mybitis.constant.ConditionConst;
+import io.github.limuqy.easyweb.mybitis.util.PageQueryUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -194,11 +195,11 @@ public class QueryRequest {
         addSort(name, true);
     }
 
-    public void doSimpleWrapper(QueryWrapper<?> wrapper) {
+    public void doSimpleWrapper(AbstractWrapper<?, String, ?> wrapper) {
         PageQueryUtil.doSimpleWrapper(this, wrapper);
     }
 
-    public void doSortWrapper(QueryWrapper<?> wrapper) {
+    public void doSortWrapper(AbstractWrapper<?, String, ?> wrapper) {
         PageQueryUtil.doSortWrapper(this, wrapper);
     }
 

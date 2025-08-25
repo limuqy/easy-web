@@ -2,6 +2,7 @@ package io.github.limuqy.easyweb.excel.write;
 
 import cn.hutool.core.bean.DynaBean;
 import cn.idev.excel.converters.Converter;
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,7 +13,6 @@ import io.github.limuqy.easyweb.core.util.BeanUtil;
 import io.github.limuqy.easyweb.core.util.LambdaUtil;
 import io.github.limuqy.easyweb.core.util.URLUtil;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -23,15 +23,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class QueryExport<T, M> {
-    private final QueryWrapper<M> wrapper;
-    private Func2<Page<M>, QueryWrapper<M>, List<M>> listQuery;
+    private final AbstractWrapper<M, String, ?> wrapper;
+    private Func2<Page<M>, AbstractWrapper<M, String, ?>, List<M>> listQuery;
     private Function<List<M>, List<T>> mapFun;
     private Function<List<T>, List<T>> applyFun;
     private final SimpleExport<T> simpleExport;
 
     private static final String SUFFIX_XLSX = ".xlsx";
 
-    private QueryExport(QueryWrapper<M> wrapper, Class<T> clazz) {
+    private QueryExport(AbstractWrapper<M, String, ?> wrapper, Class<T> clazz) {
         this.wrapper = wrapper;
         this.simpleExport = SimpleExport.build(clazz);
         mapFun = (List<M> list) -> {
@@ -57,7 +57,7 @@ public class QueryExport<T, M> {
      * @param <T>     实际导出的类型
      * @param <M>     分页查询的类型
      */
-    public static <T, M> QueryExport<T, M> build(QueryWrapper<M> wrapper, Class<T> clazz) {
+    public static <T, M> QueryExport<T, M> build(AbstractWrapper<M, String, ?> wrapper, Class<T> clazz) {
         return new QueryExport<>(wrapper, clazz);
     }
 
@@ -78,8 +78,9 @@ public class QueryExport<T, M> {
 
     /**
      * 设置响应
+     *
      * @param servletResponse 必须传入 javax.servlet.http.HttpServletResponse或者jakarta.servlet.http.HttpServletResponse
-     * @param fileName 下载文件名称（GET请求有效）
+     * @param fileName        下载文件名称（GET请求有效）
      * @return this
      */
     public QueryExport<T, M> out(Object servletResponse, String fileName) {
@@ -88,6 +89,7 @@ public class QueryExport<T, M> {
 
     /**
      * 设置响应
+     *
      * @param servletResponse 必须传入 javax.servlet.http.HttpServletResponse或者jakarta.servlet.http.HttpServletResponse
      * @return this
      */
@@ -105,7 +107,7 @@ public class QueryExport<T, M> {
      *
      * @param listQuery 查询获取后续数据
      */
-    public QueryExport<T, M> query(Func2<Page<M>, QueryWrapper<M>, List<M>> listQuery) {
+    public QueryExport<T, M> query(Func2<Page<M>, AbstractWrapper<M, String, ?>, List<M>> listQuery) {
         this.listQuery = listQuery;
         return this;
     }

@@ -32,24 +32,25 @@ public class DataDictionarySerializerHandler extends JsonSerializer<Object> impl
             dictCode = dataDictionary.value();
         }
         try {
-            JsonStreamContext outputContext = gen.getOutputContext();
-            String meaningFieldName = outputContext.getCurrentName() + dataDictionary.suffix();
-            String split = dataDictionary.split();
             if (value instanceof Collection<?>) {
                 Collection<?> collection = (Collection<?>) value;
                 List<String> list = collection.stream().map(String::valueOf).collect(Collectors.toList());
                 gen.writeArray(list.toArray(new String[0]), 0, collection.size());
-                String finalDictCode = dictCode;
-                List<String> meanings = list.stream().map(code -> DictUtil.getMeaning(finalDictCode, code)).collect(Collectors.toList());
-                if (StringUtil.isEmpty(split)) {
-                    gen.writeFieldName(meaningFieldName);
-                    gen.writeArray(meanings.toArray(new String[0]), 0, meanings.size());
-                    return;
-                }
-                gen.writeStringField(meaningFieldName, meanings.stream().map(s -> StringUtil.valueOf(s, "")).collect(Collectors.joining(split)));
             } else {
-                gen.writeString(String.valueOf(value));
-                gen.writeStringField(meaningFieldName, DictUtil.getMeaning(dictCode, String.valueOf(value), split));
+                gen.writeString(StringUtil.valueOf(value, null));
+            }
+            JsonStreamContext outputContext = gen.getOutputContext();
+            String meaningFieldName = outputContext.getCurrentName() + dataDictionary.suffix();
+
+            Object dictMeaning = DictUtil.getDictMeaning(value, dataDictionary);
+            if (value instanceof Collection<?>) {
+                Collection<?> collection = (Collection<?>) dictMeaning;
+                List<String> list = collection.stream().map(String::valueOf).collect(Collectors.toList());
+                gen.writeFieldName(meaningFieldName);
+                gen.writeArray(list.toArray(new String[0]), 0, list.size());
+            } else {
+                gen.writeString(StringUtil.valueOf(value, null));
+                gen.writeStringField(meaningFieldName, StringUtil.valueOf(dictMeaning, null));
             }
         } catch (Exception e) {
             log.error("值列表转换失败：{}:{}", dictCode, value, e);

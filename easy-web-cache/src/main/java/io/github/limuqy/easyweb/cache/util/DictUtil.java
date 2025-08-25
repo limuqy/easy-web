@@ -1,16 +1,17 @@
 package io.github.limuqy.easyweb.cache.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.limuqy.easyweb.model.cache.DictValueEntity;
+import io.github.limuqy.easyweb.cache.annotation.DataDictionary;
 import io.github.limuqy.easyweb.cache.template.CacheTemplate;
+import io.github.limuqy.easyweb.core.util.BeanUtil;
 import io.github.limuqy.easyweb.core.util.CollectionUtil;
 import io.github.limuqy.easyweb.core.util.StringUtil;
+import io.github.limuqy.easyweb.model.cache.DictValueEntity;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,7 +83,6 @@ public class DictUtil {
         return values;
     }
 
-
     public static Map<String, DictValueEntity> getDictionaryMap(String dictCode) {
         Map<String, DictValueEntity> map = new LinkedHashMap<>();
         if (StringUtil.isEmpty(dictCode)) {
@@ -116,6 +116,50 @@ public class DictUtil {
             map = new HashMap<>();
         }
         return map;
+    }
+
+    public static <T> void setMeaningValue(Collection<T> collection) {
+        collection.forEach(DictUtil::setMeaningValue);
+    }
+
+    public static <T> void setMeaningValue(T t) {
+        if (Objects.isNull(t)) {
+            return;
+        }
+        List<Field> allFieldsList = FieldUtils.getAllFieldsList(t.getClass());
+        List<Field> fieldList = allFieldsList.stream().filter((field) -> field.getAnnotation(DataDictionary.class) != null).collect(Collectors.toList());
+        fieldList.forEach(field -> {
+            DataDictionary dataDictionary = field.getAnnotation(DataDictionary.class);
+            String meaningFieldName = field.getName() + dataDictionary.suffix();
+            if (allFieldsList.stream().noneMatch(f -> f.getName().equals(meaningFieldName))) {
+                return;
+            }
+            Object value = BeanUtil.getFieldValue(t, field.getName());
+            if (Objects.isNull(value)) {
+                return;
+            }
+            Object dictMeaning = getDictMeaning(value, dataDictionary);
+            BeanUtil.setFieldValue(t, meaningFieldName, dictMeaning);
+        });
+    }
+
+    public static Object getDictMeaning(Object value, DataDictionary dataDictionary) {
+        String dictCode = dataDictionary.dictCode();
+        if (StringUtil.isNotEmpty(dataDictionary.value())) {
+            dictCode = dataDictionary.value();
+        }
+        String split = dataDictionary.split();
+        if (value instanceof Collection<?>) {
+            Collection<?> collection = (Collection<?>) value;
+            List<String> list = collection.stream().map(StringUtil::valueOf).collect(Collectors.toList());
+            String finalDictCode = dictCode;
+            List<String> meanings = list.stream().map(code -> getMeaning(finalDictCode, code)).collect(Collectors.toList());
+            if (StringUtil.isEmpty(split)) {
+                return meanings;
+            }
+            return meanings.stream().map(s -> StringUtil.valueOf(s, "")).collect(Collectors.joining(split));
+        }
+        return DictUtil.getMeaning(dictCode, String.valueOf(value), split);
     }
 
 }

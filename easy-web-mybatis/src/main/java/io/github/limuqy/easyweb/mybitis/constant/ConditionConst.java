@@ -74,6 +74,10 @@ public class ConditionConst {
      */
     public static final String NN = "isNotNull";
     /**
+     * 查询全路径下的子类数据时，做特殊处理，进行或查询
+     */
+    public static final String OR_RLK = "orLikeRight";
+    /**
      * 查询，类似于 in_like
      */
     public static final String OR_LK = "orLike";

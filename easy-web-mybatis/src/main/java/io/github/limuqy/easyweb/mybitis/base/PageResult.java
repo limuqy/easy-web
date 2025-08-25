@@ -9,37 +9,37 @@ import java.util.Collection;
 
 @Getter
 @Setter
-public class PageResult<T extends Collection<?>> {
+public class PageResult<T> {
     private long total;
-    private T table;
+    private Collection<T> table;
     private String scrollId;
 
     public PageResult() {
 
     }
 
-    public PageResult(T table, Integer total) {
+    public PageResult(Collection<T> table, Integer total) {
         this.table = table;
         this.total = total;
     }
 
-    public static <T> PageResult<Collection<T>> build(Collection<T> data, Number total) {
-        PageResult<Collection<T>> result = new PageResult<>();
+    public static <M> PageResult<M> build(Collection<M> data, Number total) {
+        PageResult<M> result = new PageResult<>();
         result.setTable(data);
         result.setTotal(total == null ? 0 : total.longValue());
         return result;
     }
 
-    public static <T> PageResult<Collection<T>> build(Page<T> page) {
-        PageResult<Collection<T>> result = new PageResult<>();
+    public static <M> PageResult<M> build(Page<M> page) {
+        PageResult<M> result = new PageResult<>();
         result.setTable(page.getRecords());
         result.setTotal(page.getTotal());
         result.setScrollId(page.countId());
         return result;
     }
 
-    public static <T> PageResult<Collection<T>> build(Page<?> page, Class<T> clazz) {
-        PageResult<Collection<T>> result = new PageResult<>();
+    public static <M> PageResult<M> build(Page<?> page, Class<M> clazz) {
+        PageResult<M> result = new PageResult<>();
         result.setTable(BeanUtil.copyToList(page.getRecords(), clazz));
         result.setTotal(page.getTotal());
         result.setScrollId(page.countId());

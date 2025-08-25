@@ -1,6 +1,7 @@
 package io.github.limuqy.easyweb.model.mybatis;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.github.limuqy.easyweb.core.annotation.RowId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public class BaseEntity {
     /**
      * 主键字段，主键默认采用SEQUENCE方式生成
      */
+    @RowId
     @TableId(type = IdType.AUTO)
     private Long id;
 

@@ -2,6 +2,7 @@ package io.github.limuqy.easyweb.mybitis.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.limuqy.easyweb.core.exception.BusinessException;
+import io.github.limuqy.easyweb.core.util.TraceIdUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -25,15 +26,15 @@ public class RestResponse<T> {
         return new RestResponse<>();
     }
 
-    public static <T> RestResponse<T> ok(T data) {
-        return new RestResponse<T>().data(data);
+    public static <M> RestResponse<M> ok(M data) {
+        return new RestResponse<M>().data(data);
     }
 
-    public static <T> RestResponse<PageResult<Collection<T>>> ok(Page<T> page) {
+    public static <M> RestResponse<PageResult<M>> ok(Page<M> page) {
         return PageResult.build(page).response();
     }
 
-    public static <T> RestResponse<PageResult<Collection<T>>> ok(Collection<T> data, Number total) {
+    public static <M> RestResponse<PageResult<M>> ok(Collection<M> data, Number total) {
         return PageResult.build(data, total).response();
     }
 
@@ -88,6 +89,10 @@ public class RestResponse<T> {
             return;
         }
         throw new BusinessException(this.message);
+    }
+
+    public String getTraceId() {
+        return TraceIdUtil.getTraceId();
     }
 
 }
