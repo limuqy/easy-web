@@ -2,14 +2,19 @@ package io.github.limuqy.easyweb.excel.write;
 
 import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
+import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.converters.Converter;
 import cn.idev.excel.support.ExcelTypeEnum;
 import cn.idev.excel.write.builder.ExcelWriterBuilder;
 import cn.idev.excel.write.metadata.WriteSheet;
 import cn.idev.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import io.github.limuqy.easyweb.core.function.Func2;
+import io.github.limuqy.easyweb.core.util.BeanUtil;
+import io.github.limuqy.easyweb.core.util.CollectionUtil;
+import io.github.limuqy.easyweb.excel.converter.TimestampStringConverter;
 
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -110,6 +115,12 @@ public class SimpleExport<T> {
     public void doExport() {
         int pageNum = 1;
         ExcelWriter excelWriter = null;
+        if (CollectionUtil.isEmpty(includeColumnFieldNames)) {
+            includeColumnFieldNames = BeanUtil.getAllFields(this.clazz).stream()
+                    .filter(e -> e.isAnnotationPresent(ExcelProperty.class))
+                    .map(Field::getName)
+                    .collect(Collectors.toList());
+        }
         WriteSheet writeSheet = FastExcel.writerSheet(0)
                 .includeColumnFieldNames(includeColumnFieldNames)
                 .excludeColumnFieldNames(excludeColumnFieldNames)
@@ -119,14 +130,16 @@ public class SimpleExport<T> {
             ExcelWriterBuilder write = FastExcel.write(outputStream).excelType(ExcelTypeEnum.XLSX);
             if (!converters.isEmpty()) {
                 converters.forEach(write::registerConverter);
+            } else {
+                write.registerConverter(new TimestampStringConverter());
             }
             if (this.head != null && !this.head.isEmpty()) {
                 write.head(this.head);
-                // 自动列宽
-                write.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
             } else {
                 write.head(this.clazz);
             }
+            // 自动列宽
+            write.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
             excelWriter = write.build();
             List<T> list;
             do {
