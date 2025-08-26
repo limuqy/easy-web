@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
-import io.github.limuqy.easyweb.core.exception.ErrorException;
 import io.github.limuqy.easyweb.core.function.Func2;
 import io.github.limuqy.easyweb.core.util.BeanUtil;
 import io.github.limuqy.easyweb.core.util.LambdaUtil;
@@ -18,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -198,10 +196,6 @@ public class QueryExport<T, M> {
      * @param servletResponse http响应
      */
     public static OutputStream processResponse(String fileName, Object servletResponse) {
-        if (Objects.isNull(servletResponse) || !Arrays.asList("javax.servlet.http.HttpServletResponse", "jakarta.servlet.http.HttpServletResponse")
-                .contains(servletResponse.getClass().getName())) {
-            throw new ErrorException("参数servletResponse必须传入");
-        }
         fileName = fileName.endsWith(SUFFIX_XLSX) ? fileName : fileName + SUFFIX_XLSX;
         // 这里URLEncoder.encode可以防止中文乱码
         String fileTitle = URLUtil.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
