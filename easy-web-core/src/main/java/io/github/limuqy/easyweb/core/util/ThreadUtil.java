@@ -1,12 +1,14 @@
 package io.github.limuqy.easyweb.core.util;
 
 import io.github.limuqy.easyweb.core.context.AppContext;
+import io.github.limuqy.easyweb.core.queue.PutBlockingQueue;
 import io.github.limuqy.easyweb.model.core.UserProfile;
-import lombok.NonNull;
-import org.slf4j.MDC;
 
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class ThreadUtil {
 
@@ -60,28 +62,11 @@ public class ThreadUtil {
     }
 
     public static ExecutorService blockingVirtualService(int corePoolSize, int maxQueue) {
-        return new ThreadPoolExecutor(0, corePoolSize, 1L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
+        return new ThreadPoolExecutor(0, corePoolSize, 5L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
     }
 
-    /**
-     * 重写offer为阻塞操作
-     */
-    private static class PutBlockingQueue<T> extends LinkedBlockingQueue<T> {
-
-        public PutBlockingQueue(int size) {
-            super(size);
-        }
-
-        @Override
-        public boolean offer(@NonNull T t) {
-            try {
-                put(t);
-                return true;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return false;
-        }
+    public static ExecutorService blockingVirtualService(int maxQueue) {
+        return new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 5L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
     }
 
     public static void closeExecutor(ExecutorService executorService) {
