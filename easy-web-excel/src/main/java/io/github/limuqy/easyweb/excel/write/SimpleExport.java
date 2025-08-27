@@ -7,7 +7,6 @@ import cn.idev.excel.converters.Converter;
 import cn.idev.excel.support.ExcelTypeEnum;
 import cn.idev.excel.write.builder.ExcelWriterBuilder;
 import cn.idev.excel.write.metadata.WriteSheet;
-import cn.idev.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import io.github.limuqy.easyweb.core.function.Func2;
 import io.github.limuqy.easyweb.core.util.BeanUtil;
 import io.github.limuqy.easyweb.core.util.CollectionUtil;
@@ -21,18 +20,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 简单导出
+ *
+ * @param <T> 导出的Bean类型
+ */
 public class SimpleExport<T> {
-    private Integer limit = 500;
-    private final Class<T> clazz;
-    private OutputStream outputStream;
-    private Func2<Integer, Integer, List<T>> listQuery;
-    private Collection<String> excludeColumnFieldNames;
-    private Collection<String> includeColumnFieldNames;
-    private List<List<String>> head;
+    protected Integer limit = 500;
+    protected final Class<T> clazz;
+    protected OutputStream outputStream;
+    protected Func2<Integer, Integer, List<T>> listQuery;
+    protected Collection<String> excludeColumnFieldNames;
+    protected Collection<String> includeColumnFieldNames;
+    protected List<List<String>> head;
 
-    private final List<Converter<?>> converters = new ArrayList<>();
+    protected final List<Converter<?>> converters = new ArrayList<>();
 
-    private SimpleExport(Class<T> clazz) {
+    protected SimpleExport(Class<T> clazz) {
         this.clazz = clazz;
     }
 
@@ -113,7 +117,6 @@ public class SimpleExport<T> {
      * 执行导出
      */
     public void doExport() {
-        int pageNum = 1;
         ExcelWriter excelWriter = null;
         if (CollectionUtil.isEmpty(includeColumnFieldNames)) {
             includeColumnFieldNames = BeanUtil.getAllFields(this.clazz).stream()
@@ -138,23 +141,26 @@ public class SimpleExport<T> {
             } else {
                 write.head(this.clazz);
             }
-            // 自动列宽
-            write.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
             excelWriter = write.build();
-            List<T> list;
-            do {
-                list = listQuery.apply(pageNum, limit);
-                excelWriter.write(list, writeSheet);
-                pageNum++;
-            } while (list.size() >= limit);
+            write(excelWriter, writeSheet);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (excelWriter != null) {
                 excelWriter.finish();
-                excelWriter.close();
             }
         }
+    }
+
+    protected void write(ExcelWriter excelWriter, WriteSheet writeSheet) throws Exception {
+        int pageNum = 1;
+        List<T> list;
+        do {
+            list = listQuery.apply(pageNum, limit);
+            excelWriter.write(list, writeSheet);
+            outputStream.flush();
+            pageNum++;
+        } while (list.size() >= limit);
     }
 
 }

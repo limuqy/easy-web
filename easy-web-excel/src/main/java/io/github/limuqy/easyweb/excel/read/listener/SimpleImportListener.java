@@ -39,7 +39,7 @@ public class SimpleImportListener<T> implements ReadListener<T> {
         // 达到BATCH_COUNT了，需要去存储一次数据库，防止数据几万条数据在内存，容易OOM
         if (cachedDataList.size() >= BATCH_COUNT) {
             List<T> list = cachedDataList;
-            executorService.execute(() -> consumer.accept(list));
+            executorService.execute(ThreadUtil.wrap(() -> consumer.accept(list)));
             // 存储完成清理 list
             cachedDataList = ListUtils.newArrayListWithExpectedSize(BATCH_COUNT);
         }
@@ -48,7 +48,7 @@ public class SimpleImportListener<T> implements ReadListener<T> {
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
         if (!cachedDataList.isEmpty()) {
-            executorService.execute(() -> consumer.accept(cachedDataList));
+            executorService.execute(ThreadUtil.wrap(() -> consumer.accept(cachedDataList)));
         }
         ThreadUtil.closeExecutor(executorService);
     }

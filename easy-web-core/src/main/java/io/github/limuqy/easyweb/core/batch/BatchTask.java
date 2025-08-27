@@ -63,12 +63,16 @@ public class BatchTask {
         try {
             executorService = ThreadUtil.blockingVirtualService(quantity, 100);
             tasks.forEach(executorService::submit);
+            if (executorService.awaitTermination(timeout, unit)) {
+                log.debug("批量任务执行完毕，耗时：{}", System.currentTimeMillis() - millis);
+            } else {
+                log.debug("批量任务执行超时，耗时：{}", System.currentTimeMillis() - millis);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             ThreadUtil.closeExecutor(executorService);
         }
-        log.debug("批量任务执行完毕，耗时：{}", System.currentTimeMillis() - millis);
     }
 
 }
