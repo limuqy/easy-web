@@ -158,7 +158,6 @@ public class SimpleExport<T> {
         do {
             list = listQuery.apply(pageNum, limit);
             excelWriter.write(list, writeSheet);
-            outputStream.flush();
             pageNum++;
         } while (list.size() >= limit);
     }

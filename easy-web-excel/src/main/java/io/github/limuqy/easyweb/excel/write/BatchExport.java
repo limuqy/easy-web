@@ -2,7 +2,6 @@ package io.github.limuqy.easyweb.excel.write;
 
 import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.write.metadata.WriteSheet;
-import io.github.limuqy.easyweb.core.queue.PutBlockingQueue;
 import io.github.limuqy.easyweb.core.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,23 +79,16 @@ public class BatchExport<T> extends SimpleExport<T> {
         log.debug("预计导出总数：{}，将启用多线程导出。", total);
         ExecutorService executorService = null;
         try {
-            PutBlockingQueue<List<T>> writeQueue = new PutBlockingQueue<>(THREAD_NUM * 2);
             executorService = ThreadUtil.blockingVirtualService(THREAD_NUM);
             int pageTotal = (int) Math.ceil(total / (limit * 1.0D));
-            List<Future<?>> futures = new ArrayList<>(pageTotal);
+            List<Future<List<T>>> futures = new ArrayList<>(pageTotal);
             for (int i = 1; i <= pageTotal; i++) {
                 int page = i;
-                Future<?> future = executorService.submit(() -> {
-                    List<T> list = listQuery.apply(page, limit);
-                    writeQueue.offer(list);
-                });
-                futures.add(future);
+                futures.add(executorService.submit(() -> listQuery.apply(page, limit)));
             }
-            for (Future<?> future : futures) {
-                future.get(timeout, unit);
-                List<T> data = writeQueue.take();
+            for (Future<List<T>> future : futures) {
+                List<T> data = future.get(timeout, unit);
                 excelWriter.write(data, writeSheet);
-                outputStream.flush();
                 data.clear();
             }
         } finally {
