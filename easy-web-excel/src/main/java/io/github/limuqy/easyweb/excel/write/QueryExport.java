@@ -2,7 +2,7 @@ package io.github.limuqy.easyweb.excel.write;
 
 import cn.hutool.core.bean.DynaBean;
 import cn.idev.excel.converters.Converter;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
@@ -26,16 +26,16 @@ import java.util.stream.Collectors;
  * @param <M> 查询的Bean类型
  */
 public class QueryExport<T, M> {
-    private final QueryWrapper<M> wrapper;
-    private Func2<Page<M>, QueryWrapper<M>, List<M>> listQuery;
+    private final AbstractWrapper<M, String, ?> wrapper;
+    private Func2<Page<M>, AbstractWrapper<M, String, ?>, List<M>> listQuery;
     private Function<List<M>, List<T>> mapFun;
     private Function<List<T>, List<T>> applyFun;
-    private Function<QueryWrapper<M>, Long> totalQuery;
+    private Function<AbstractWrapper<M, String, ?>, Long> totalQuery;
     private final SimpleExport<T> simpleExport;
 
     private static final String SUFFIX_XLSX = ".xlsx";
 
-    private QueryExport(QueryWrapper<M> wrapper, Class<T> clazz, SimpleExport<T> export) {
+    private QueryExport(AbstractWrapper<M, String, ?> wrapper, Class<T> clazz, SimpleExport<T> export) {
         this.wrapper = wrapper;
         this.simpleExport = export;
         mapFun = (List<M> list) -> {
@@ -52,9 +52,9 @@ public class QueryExport<T, M> {
      * 单线程导出
      *
      * @param wrapper 条件构造器
-     * @param <T>     实际导出的类型
+     * @param <M>     实际导出的类型
      */
-    public static <T> QueryExport<T, T> build(QueryWrapper<T> wrapper) {
+    public static <M> QueryExport<M, M> build(AbstractWrapper<M, String, ?> wrapper) {
         return new QueryExport<>(wrapper, wrapper.getEntityClass(), SimpleExport.build(wrapper.getEntityClass()));
     }
 
@@ -66,7 +66,7 @@ public class QueryExport<T, M> {
      * @param <T>     实际导出的类型
      * @param <M>     分页查询的类型
      */
-    public static <T, M> QueryExport<T, M> build(QueryWrapper<M> wrapper, Class<T> clazz) {
+    public static <T, M> QueryExport<T, M> build(AbstractWrapper<M, String, ?> wrapper, Class<T> clazz) {
         return new QueryExport<>(wrapper, clazz, SimpleExport.build(clazz));
     }
 
@@ -74,9 +74,9 @@ public class QueryExport<T, M> {
      * 大批量导出时使用多线程
      *
      * @param wrapper 条件构造器
-     * @param <T>     实际导出的类型
+     * @param <M>     实际导出的类型
      */
-    public static <T> QueryExport<T, T> buildBatch(QueryWrapper<T> wrapper) {
+    public static <M> QueryExport<M, M> buildBatch(AbstractWrapper<M, String, ?> wrapper) {
         return new QueryExport<>(wrapper, wrapper.getEntityClass(), BatchExport.build(wrapper.getEntityClass()));
     }
 
@@ -88,7 +88,7 @@ public class QueryExport<T, M> {
      * @param <T>     实际导出的类型
      * @param <M>     分页查询的类型
      */
-    public static <T, M> QueryExport<T, M> buildBatch(QueryWrapper<M> wrapper, Class<T> clazz) {
+    public static <T, M> QueryExport<T, M> buildBatch(AbstractWrapper<M, String, ?> wrapper, Class<T> clazz) {
         return new QueryExport<>(wrapper, clazz, BatchExport.build(clazz));
     }
 
@@ -138,7 +138,7 @@ public class QueryExport<T, M> {
      *
      * @param listQuery 查询获取后续数据
      */
-    public QueryExport<T, M> query(Func2<Page<M>, QueryWrapper<M>, List<M>> listQuery) {
+    public QueryExport<T, M> query(Func2<Page<M>, AbstractWrapper<M, String, ?>, List<M>> listQuery) {
         this.listQuery = listQuery;
         return this;
     }
@@ -149,7 +149,7 @@ public class QueryExport<T, M> {
      * @param totalQuery 查询获取数据总量
      * @return this
      */
-    public QueryExport<T, M> total(Function<QueryWrapper<M>, Long> totalQuery) {
+    public QueryExport<T, M> total(Function<AbstractWrapper<M, String, ?>, Long> totalQuery) {
         this.totalQuery = totalQuery;
         return this;
     }

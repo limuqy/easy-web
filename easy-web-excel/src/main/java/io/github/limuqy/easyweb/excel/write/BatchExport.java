@@ -2,6 +2,7 @@ package io.github.limuqy.easyweb.excel.write;
 
 import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.write.metadata.WriteSheet;
+import io.github.limuqy.easyweb.core.batch.BatchTask;
 import io.github.limuqy.easyweb.core.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,8 +22,10 @@ import java.util.function.Supplier;
 public class BatchExport<T> extends SimpleExport<T> {
 
     protected Supplier<Long> totalQuery;
-
-    private static final int THREAD_NUM = 8;
+    /**
+     * 并发量
+     */
+    private int quantity = 8;
     private long timeout = 5;
     private TimeUnit unit = TimeUnit.MINUTES;
 
@@ -35,7 +38,7 @@ public class BatchExport<T> extends SimpleExport<T> {
      * @param <T>   实际导出的类型
      * @return this
      */
-    public static <T> SimpleExport<T> build(Class<T> clazz) {
+    public static <T> BatchExport<T> build(Class<T> clazz) {
         return new BatchExport<>(clazz);
     }
 
@@ -45,18 +48,26 @@ public class BatchExport<T> extends SimpleExport<T> {
      * @param totalQuery 查询获取数据总量
      * @return this
      */
-    public SimpleExport<T> total(Supplier<Long> totalQuery) {
+    public BatchExport<T> total(Supplier<Long> totalQuery) {
         this.totalQuery = totalQuery;
         return this;
     }
 
-    public SimpleExport<T> timeout(long timeout) {
+    /**
+     * 设置并行运行的线程数量
+     */
+    public BatchExport<T> parallel(int quantity) {
+        this.quantity = quantity;
+        return this;
+    }
+
+    public BatchExport<T> timeout(long timeout) {
         this.timeout = timeout;
         this.unit = TimeUnit.MINUTES;
         return this;
     }
 
-    public SimpleExport<T> timeout(long timeout, TimeUnit unit) {
+    public BatchExport<T> timeout(long timeout, TimeUnit unit) {
         this.timeout = timeout;
         this.unit = unit;
         return this;
@@ -79,12 +90,12 @@ public class BatchExport<T> extends SimpleExport<T> {
         log.debug("预计导出总数：{}，将启用多线程导出。", total);
         ExecutorService executorService = null;
         try {
-            executorService = ThreadUtil.blockingVirtualService(THREAD_NUM);
+            executorService = ThreadUtil.blockingVirtualService(quantity);
             int pageTotal = (int) Math.ceil(total / (limit * 1.0D));
             List<Future<List<T>>> futures = new ArrayList<>(pageTotal);
             for (int i = 1; i <= pageTotal; i++) {
                 int page = i;
-                futures.add(executorService.submit(() -> listQuery.apply(page, limit)));
+                futures.add(executorService.submit(ThreadUtil.wrap(() -> listQuery.apply(page, limit))));
             }
             for (Future<List<T>> future : futures) {
                 List<T> data = future.get(timeout, unit);
