@@ -70,6 +70,10 @@ public class ThreadUtil {
     }
 
     public static void closeExecutor(ExecutorService executorService) {
+        closeExecutor(executorService, 2L, TimeUnit.HOURS);
+    }
+
+    public static void closeExecutor(ExecutorService executorService, Long timeout, TimeUnit unit) {
         if (Objects.isNull(executorService)) {
             return;
         }
@@ -79,7 +83,7 @@ public class ThreadUtil {
             boolean interrupted = false;
             while (!terminated) {
                 try {
-                    terminated = executorService.awaitTermination(2L, TimeUnit.HOURS);
+                    terminated = executorService.awaitTermination(timeout, unit);
                 } catch (InterruptedException e) {
                     if (!interrupted) {
                         executorService.shutdownNow();

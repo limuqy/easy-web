@@ -7,6 +7,8 @@ import cn.hutool.crypto.symmetric.SymmetricCrypto;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.limuqy.easyweb.core.annotation.RowId;
 import io.github.limuqy.easyweb.core.annotation.RowIdEntity;
+import io.github.limuqy.easyweb.core.config.EasyWebProperties;
+import io.github.limuqy.easyweb.core.config.RowIdProperties;
 import io.github.limuqy.easyweb.core.exception.RowIdException;
 import io.github.limuqy.easyweb.model.mybatis.BaseEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,11 @@ public class RowIdUtil {
 
     private static String getSecret() {
         if (Objects.isNull(secret)) {
-            secret = SpringUtil.getProperty("easy-web.row-id.secret", "");
+            EasyWebProperties easyWebProperties = SpringUtil.getBean(EasyWebProperties.class);
+            if (Objects.nonNull(easyWebProperties) && Objects.nonNull(easyWebProperties.getRowId())) {
+                RowIdProperties rowId = easyWebProperties.getRowId();
+                secret = rowId.getSecret();
+            }
         }
         return secret;
     }
@@ -37,7 +43,11 @@ public class RowIdUtil {
 
     public static boolean isDecryptNumber() {
         if (Objects.isNull(decryptNumber)) {
-            decryptNumber = Boolean.valueOf(SpringUtil.getProperty("easy-web.row-id.decrypt-number", "false"));
+            EasyWebProperties easyWebProperties = SpringUtil.getBean(EasyWebProperties.class);
+            if (Objects.nonNull(easyWebProperties) && Objects.nonNull(easyWebProperties.getRowId())) {
+                RowIdProperties rowId = easyWebProperties.getRowId();
+                decryptNumber = rowId.getDecryptNumber();
+            }
         }
         return decryptNumber;
     }

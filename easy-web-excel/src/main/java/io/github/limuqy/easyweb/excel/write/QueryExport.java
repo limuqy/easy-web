@@ -3,7 +3,6 @@ package io.github.limuqy.easyweb.excel.write;
 import cn.hutool.core.bean.DynaBean;
 import cn.idev.excel.converters.Converter;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
@@ -31,7 +30,7 @@ public class QueryExport<T, M> {
     private Func2<Page<M>, AbstractWrapper<M, String, ?>, List<M>> listQuery;
     private Function<List<M>, List<T>> mapFun;
     private Function<List<T>, List<T>> applyFun;
-    private Function<QueryWrapper<M>, Long> totalQuery;
+    private Function<AbstractWrapper<M, String, ?>, Long> totalQuery;
     private final SimpleExport<T> simpleExport;
 
     private static final String SUFFIX_XLSX = ".xlsx";
@@ -53,9 +52,9 @@ public class QueryExport<T, M> {
      * 单线程导出
      *
      * @param wrapper 条件构造器
-     * @param <T>     实际导出的类型
+     * @param <M>     实际导出的类型
      */
-    public static <T> QueryExport<T, T> build(QueryWrapper<T> wrapper) {
+    public static <M> QueryExport<M, M> build(AbstractWrapper<M, String, ?> wrapper) {
         return new QueryExport<>(wrapper, wrapper.getEntityClass(), SimpleExport.build(wrapper.getEntityClass()));
     }
 
@@ -75,9 +74,9 @@ public class QueryExport<T, M> {
      * 大批量导出时使用多线程
      *
      * @param wrapper 条件构造器
-     * @param <T>     实际导出的类型
+     * @param <M>     实际导出的类型
      */
-    public static <T> QueryExport<T, T> buildBatch(AbstractWrapper<M, String, ?> wrapper) {
+    public static <M> QueryExport<M, M> buildBatch(AbstractWrapper<M, String, ?> wrapper) {
         return new QueryExport<>(wrapper, wrapper.getEntityClass(), BatchExport.build(wrapper.getEntityClass()));
     }
 
@@ -150,7 +149,7 @@ public class QueryExport<T, M> {
      * @param totalQuery 查询获取数据总量
      * @return this
      */
-    public QueryExport<T, M> total(Function<QueryWrapper<M>, Long> totalQuery) {
+    public QueryExport<T, M> total(Function<AbstractWrapper<M, String, ?>, Long> totalQuery) {
         this.totalQuery = totalQuery;
         return this;
     }

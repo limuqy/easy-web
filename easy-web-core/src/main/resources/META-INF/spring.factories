@@ -1,3 +1,4 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.github.limuqy.easyweb.core.config.AppConfiguration
+io.github.limuqy.easyweb.core.config.AppConfiguration,\
+io.github.limuqy.easyweb.core.config.EasyWebProperties
