@@ -17,7 +17,7 @@ public class BatchTask {
     /**
      * 并发量
      */
-    private int quantity = 10;
+    private int quantity = 8;
     private long timeout = 1;
     private TimeUnit unit = TimeUnit.HOURS;
 
@@ -58,21 +58,20 @@ public class BatchTask {
     }
 
     public void run() {
-        long millis = System.currentTimeMillis();
+        long millis;
         ExecutorService executorService = null;
         try {
-            executorService = ThreadUtil.blockingVirtualService(quantity, 100);
-            tasks.forEach(executorService::submit);
-            if (executorService.awaitTermination(timeout, unit)) {
-                log.debug("批量任务执行完毕，耗时：{}", System.currentTimeMillis() - millis);
-            } else {
-                log.debug("批量任务执行超时，耗时：{}", System.currentTimeMillis() - millis);
+            executorService = ThreadUtil.blockingVirtualService(Math.min(quantity, tasks.size()));
+            millis = System.currentTimeMillis();
+            for (Runnable task : tasks) {
+                executorService.execute(task);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            ThreadUtil.closeExecutor(executorService);
+            ThreadUtil.closeExecutor(executorService, timeout, unit);
         }
+        log.debug("批量任务执行完毕，耗时：{}", System.currentTimeMillis() - millis);
     }
 
 }

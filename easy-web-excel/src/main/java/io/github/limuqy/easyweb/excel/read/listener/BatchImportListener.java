@@ -51,7 +51,12 @@ public class BatchImportListener<T> extends SimpleImportListener<T> {
         if (!cachedDataList.isEmpty()) {
             executorService.execute(ThreadUtil.wrap(() -> consumer.accept(cachedDataList)));
         }
-        ThreadUtil.closeExecutor(executorService, timeout, unit);
+        try {
+            ThreadUtil.closeExecutor(executorService, timeout, unit);
+        } catch (Exception e) {
+            log.error("Failed to close executor service", e);
+            Thread.currentThread().interrupt();
+        }
     }
 
 }

@@ -71,7 +71,7 @@ public class BatchCallTask<T> {
     public List<T> run() {
         ExecutorService executorService = null;
         try {
-            executorService = ThreadUtil.blockingVirtualService(quantity, 100);
+            executorService = ThreadUtil.blockingVirtualService(Math.min(quantity, tasks.size()));
             List<Future<T>> futures = executorService.invokeAll(tasks, timeout, unit);
             long millis = System.currentTimeMillis();
             List<T> list = new ArrayList<>();

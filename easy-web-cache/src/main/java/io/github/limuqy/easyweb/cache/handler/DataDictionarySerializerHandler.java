@@ -34,8 +34,7 @@ public class DataDictionarySerializerHandler extends JsonSerializer<Object> impl
         try {
             if (value instanceof Collection<?>) {
                 Collection<?> collection = (Collection<?>) value;
-                List<String> list = collection.stream().map(String::valueOf).collect(Collectors.toList());
-                gen.writeArray(list.toArray(new String[0]), 0, collection.size());
+                gen.writeArray(collection.stream().map(String::valueOf).toArray(String[]::new), 0, collection.size());
             } else {
                 gen.writeString(StringUtil.valueOf(value, null));
             }

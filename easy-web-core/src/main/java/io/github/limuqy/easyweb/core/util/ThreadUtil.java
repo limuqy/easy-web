@@ -3,19 +3,18 @@ package io.github.limuqy.easyweb.core.util;
 import io.github.limuqy.easyweb.core.context.AppContext;
 import io.github.limuqy.easyweb.core.queue.PutBlockingQueue;
 import io.github.limuqy.easyweb.model.core.UserProfile;
+import org.slf4j.MDC;
 
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-public class ThreadUtil {
+public class ThreadUtil extends cn.hutool.core.thread.ThreadUtil {
 
     private final static ExecutorService EXECUTOR_SERVICE = virtualExecutor();
 
     public static ExecutorService virtualExecutor() {
-        return blockingVirtualService(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE);
+        return blockingVirtualService(Runtime.getRuntime().availableProcessors());
     }
 
     public static void startVirtualThread(Runnable task) {
@@ -39,10 +38,10 @@ public class ThreadUtil {
 
     public static <T> Callable<T> wrap(final Callable<T> callable) {
         UserProfile userProfile = AppContext.getUserProfile();
-        String traceId = TraceIdUtil.getTraceId();
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
         return () -> {
-            if (StringUtil.isNoneBlank(traceId)) {
-                TraceIdUtil.setTraceId(traceId);
+            if (MapUtil.isNotEmpty(contextMap)) {
+                MDC.setContextMap(contextMap);
             }
             AppContext.setUserProfile(userProfile);
             return callable.call();
@@ -51,10 +50,10 @@ public class ThreadUtil {
 
     public static Runnable wrap(final Runnable runnable) {
         UserProfile userProfile = AppContext.getUserProfile();
-        String traceId = TraceIdUtil.getTraceId();
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
         return () -> {
-            if (StringUtil.isNoneBlank(traceId)) {
-                TraceIdUtil.setTraceId(traceId);
+            if (MapUtil.isNotEmpty(contextMap)) {
+                MDC.setContextMap(contextMap);
             }
             AppContext.setUserProfile(userProfile);
             runnable.run();
@@ -62,11 +61,15 @@ public class ThreadUtil {
     }
 
     public static ExecutorService blockingVirtualService(int corePoolSize, int maxQueue) {
-        return new ThreadPoolExecutor(0, corePoolSize, 5L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
+        return new ThreadPoolExecutor(corePoolSize, corePoolSize, 5L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
     }
 
-    public static ExecutorService blockingVirtualService(int maxQueue) {
-        return new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 5L, TimeUnit.MINUTES, new PutBlockingQueue<>(maxQueue));
+    public static ExecutorService blockingVirtualService(int corePoolSize) {
+        return blockingVirtualService(corePoolSize, Short.MAX_VALUE);
+    }
+
+    public static ExecutorService blockingVirtualService() {
+        return blockingVirtualService(Runtime.getRuntime().availableProcessors());
     }
 
     public static void closeExecutor(ExecutorService executorService) {

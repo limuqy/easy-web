@@ -90,8 +90,8 @@ public class BatchExport<T> extends SimpleExport<T> {
         log.debug("预计导出总数：{}，将启用多线程导出。", total);
         ExecutorService executorService = null;
         try {
-            executorService = ThreadUtil.blockingVirtualService(quantity);
-            int pageTotal = (int) Math.ceil(total / (limit * 1.0D));
+            int pageTotal = (int) Math.ceil((double) total / limit);
+            executorService = ThreadUtil.blockingVirtualService(Math.min(quantity, pageTotal));
             List<Future<List<T>>> futures = new ArrayList<>(pageTotal);
             for (int i = 1; i <= pageTotal; i++) {
                 int page = i;
@@ -100,10 +100,13 @@ public class BatchExport<T> extends SimpleExport<T> {
             for (Future<List<T>> future : futures) {
                 List<T> data = future.get(timeout, unit);
                 excelWriter.write(data, writeSheet);
-                data.clear();
             }
         } finally {
-            ThreadUtil.closeExecutor(executorService);
+            try {
+                ThreadUtil.closeExecutor(executorService);
+            } catch (Exception e) {
+                log.error("Failed to close executor service", e);
+            }
         }
     }
 }
