@@ -20,9 +20,12 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class QueryRequest {
+    @Schema(title = "自定义参数集")
     private Map<String, Object> data;
-    @Schema(title = "条件集")
+    @Schema(title = "条件参数集")
     private List<QueryParam> params;
+    @Schema(title = "条件集")
+    private List<QueryCondition> conditions;
     @Schema(title = "排序配置")
     private List<SortParam> sorts;
 
@@ -31,6 +34,13 @@ public class QueryRequest {
             params = new ArrayList<>(10);
         }
         return params;
+    }
+
+    public List<QueryCondition> getConditions() {
+        if (conditions == null) {
+            conditions = new ArrayList<>(10);
+        }
+        return conditions;
     }
 
     public List<SortParam> getSorts() {

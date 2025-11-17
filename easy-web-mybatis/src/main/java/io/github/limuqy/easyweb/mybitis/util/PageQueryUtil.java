@@ -5,13 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import io.github.limuqy.easyweb.core.annotation.RowId;
 import io.github.limuqy.easyweb.core.exception.RowIdException;
 import io.github.limuqy.easyweb.core.util.*;
+import io.github.limuqy.easyweb.mybitis.base.QueryCondition;
 import io.github.limuqy.easyweb.mybitis.base.QueryParam;
 import io.github.limuqy.easyweb.mybitis.base.QueryRequest;
 import io.github.limuqy.easyweb.mybitis.base.SortParam;
 import io.github.limuqy.easyweb.mybitis.constant.ConditionConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -32,99 +32,138 @@ public class PageQueryUtil {
     public static void doSimpleWrapper(QueryRequest queryRequest, AbstractWrapper<?, String, ?> wrapper) {
         Class<?> clazz = wrapper.getEntityClass();
         List<Field> list = BeanUtil.getEntityClassField(clazz);
-        for (QueryParam queryParam : queryRequest.getParams()) {
-            String fieldName = StringUtil.upper2Underline(queryParam.getName());
-            Field field = list.stream()
-                    .filter(f -> StringUtil.upper2Underline(f.getName()).equals(fieldName))
-                    .findFirst()
-                    .orElse(null);
+        doParamsWrapper(queryRequest.getParams(), wrapper, list, clazz);
+        if (CollectionUtil.isNotEmpty(queryRequest.getConditions())) {
+            String log = doConditionsWrapper(queryRequest.getConditions(), wrapper, list, clazz, false);
+            logger.debug(log);
+        }
+    }
+
+    private static void doParamsWrapper(List<QueryParam> params, AbstractWrapper<?, String, ?> wrapper, List<Field> list, Class<?> clazz) {
+        for (QueryParam queryParam : params) {
             paramLogger(queryParam);
-            String value1 = queryParam.getValue();
-            boolean value1NoneBlank = StringUtil.isNotBlank(value1);
-            if (StringUtil.isBlank(queryParam.getOp())) {
-                queryParam.setOp(ConditionConst.EQ);
+            parseParamWrapper(queryParam, wrapper, list, clazz);
+        }
+    }
+
+    private static void parseParamWrapper(QueryParam queryParam, AbstractWrapper<?, String, ?> wrapper, List<Field> list, Class<?> clazz) {
+        String fieldName = StringUtil.upper2Underline(queryParam.getName());
+        Field field = list.stream()
+                .filter(f -> StringUtil.upper2Underline(f.getName()).equals(fieldName))
+                .findFirst()
+                .orElse(null);
+        String value1 = queryParam.getValue();
+        boolean value1NoneBlank = StringUtil.isNotBlank(value1);
+        if (StringUtil.isBlank(queryParam.getOp())) {
+            queryParam.setOp(ConditionConst.EQ);
+        }
+        switch (queryParam.getOp()) {
+            case ConditionConst.EQ:
+                wrapper.eq(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.NE:
+                wrapper.ne(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.LK:
+                wrapper.like(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
+                break;
+            case ConditionConst.LLK:
+                wrapper.likeLeft(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
+                break;
+            case ConditionConst.RLK:
+                wrapper.likeRight(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
+                break;
+            case ConditionConst.NC:
+                wrapper.notLike(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
+                break;
+            case ConditionConst.NEL:
+                wrapper.notLikeLeft(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.NBL:
+                wrapper.notLikeRight(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.IN:
+                wrapper.in(CollectionUtil.isAllNotEmpty(queryParam.getValues()), fieldName, queryParam.getValues().stream().map(v -> getValue(v, field, clazz)).collect(Collectors.toList()));
+                break;
+            case ConditionConst.NIN:
+                wrapper.notIn(CollectionUtil.isAllNotEmpty(queryParam.getValues()), fieldName, queryParam.getValues().stream().map(v -> getValue(v, field, clazz)).collect(Collectors.toList()));
+                break;
+            case ConditionConst.GT:
+                wrapper.gt(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.GE:
+                wrapper.ge(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.LT:
+                wrapper.lt(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.LE:
+                wrapper.le(value1NoneBlank, fieldName, getValue(value1, field, clazz));
+                break;
+            case ConditionConst.BT:
+                if (CollectionUtil.isAllNotEmpty(queryParam.getValues()) && queryParam.getValues().size() == 2) {
+                    wrapper.between(fieldName,
+                            getValue(queryParam.getValues().get(0), field, clazz),
+                            getValue(queryParam.getValues().get(1), field, clazz));
+                }
+                break;
+            case ConditionConst.NBT:
+                if (CollectionUtil.isAllNotEmpty(queryParam.getValues()) && queryParam.getValues().size() == 2) {
+                    wrapper.notBetween(fieldName,
+                            getValue(queryParam.getValues().get(0), field, clazz),
+                            getValue(queryParam.getValues().get(1), field, clazz));
+                }
+                break;
+            case ConditionConst.NU:
+                wrapper.isNull(fieldName);
+                break;
+            case ConditionConst.NN:
+                wrapper.isNotNull(fieldName);
+                break;
+            case ConditionConst.OR_RLK:
+                // 查询全路径下的子类数据时，做特殊处理，进行或查询
+                List<String> orLikeRightList = getValue(queryParam.getValues(), field, clazz);
+                if (CollUtil.isNotEmpty(orLikeRightList)) {
+                    wrapper.and(consumer -> orLikeRightList.forEach(fullCodes -> consumer.or().likeRight(fieldName, fullCodes)));
+                }
+                break;
+            case ConditionConst.OR_LK:
+                // 查询全路径下的子类数据时，做特殊处理，进行或查询
+                List<String> roLikeList = getValue(queryParam.getValues(), field, clazz);
+                if (CollUtil.isNotEmpty(roLikeList)) {
+                    wrapper.and(consumer -> roLikeList.forEach(fullCodes -> consumer.or().like(fieldName, fullCodes)));
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static String doConditionsWrapper(List<QueryCondition> conditions, AbstractWrapper<?, String, ?> wrapper, List<Field> list, Class<?> clazz, boolean isOr) {
+        List<String> logs = new ArrayList<>();
+        for (QueryCondition condition : conditions) {
+            if (!condition.isCollection()) {
+                if (isOr) {
+                    wrapper.or();
+                }
+                boolean isValues = ConditionConst.IN.equals(condition.getOp()) || ConditionConst.BT.equals(condition.getOp()) || ConditionConst.NBT.equals(condition.getOp());
+                logs.add(String.format("{%s %s %s}", condition.getName(), condition.getOp(), isValues ? condition.getValues() : condition.getValue()));
+                parseParamWrapper(condition, wrapper, list, clazz);
+                continue;
             }
-            switch (queryParam.getOp()) {
-                case ConditionConst.EQ:
-                    wrapper.eq(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.NE:
-                    wrapper.ne(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.LK:
-                    wrapper.like(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
-                    break;
-                case ConditionConst.LLK:
-                    wrapper.likeLeft(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
-                    break;
-                case ConditionConst.RLK:
-                    wrapper.likeRight(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
-                    break;
-                case ConditionConst.NC:
-                    wrapper.notLike(value1NoneBlank, fieldName, getValue(escapeSpecialChar(value1), field, clazz));
-                    break;
-                case ConditionConst.NEL:
-                    wrapper.notLikeLeft(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.NBL:
-                    wrapper.notLikeRight(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.IN:
-                    wrapper.in(CollectionUtil.isAllNotEmpty(queryParam.getValues()), fieldName, queryParam.getValues().stream().map(v -> getValue(v, field, clazz)).collect(Collectors.toList()));
-                    break;
-                case ConditionConst.NIN:
-                    wrapper.notIn(CollectionUtil.isAllNotEmpty(queryParam.getValues()), fieldName, queryParam.getValues().stream().map(v -> getValue(v, field, clazz)).collect(Collectors.toList()));
-                    break;
-                case ConditionConst.GT:
-                    wrapper.gt(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.GE:
-                    wrapper.ge(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.LT:
-                    wrapper.lt(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.LE:
-                    wrapper.le(value1NoneBlank, fieldName, getValue(value1, field, clazz));
-                    break;
-                case ConditionConst.BT:
-                    if (CollectionUtil.isAllNotEmpty(queryParam.getValues()) && queryParam.getValues().size() == 2) {
-                        wrapper.between(fieldName,
-                                getValue(queryParam.getValues().get(0), field, clazz),
-                                getValue(queryParam.getValues().get(1), field, clazz));
-                    }
-                    break;
-                case ConditionConst.NBT:
-                    if (CollectionUtil.isAllNotEmpty(queryParam.getValues()) && queryParam.getValues().size() == 2) {
-                        wrapper.notBetween(fieldName,
-                                getValue(queryParam.getValues().get(0), field, clazz),
-                                getValue(queryParam.getValues().get(1), field, clazz));
-                    }
-                    break;
-                case ConditionConst.NU:
-                    wrapper.isNull(fieldName);
-                    break;
-                case ConditionConst.NN:
-                    wrapper.isNotNull(fieldName);
-                    break;
-                case ConditionConst.OR_RLK:
-                    // 查询全路径下的子类数据时，做特殊处理，进行或查询
-                    List<String> orLikeRightList = getValue(queryParam.getValues(), field, clazz);
-                    if (CollUtil.isNotEmpty(orLikeRightList)) {
-                        wrapper.and(consumer -> orLikeRightList.forEach(fullCodes -> consumer.or().likeRight(fieldName, fullCodes)));
-                    }
-                    break;
-                case ConditionConst.OR_LK:
-                    // 查询全路径下的子类数据时，做特殊处理，进行或查询
-                    List<String> roLikeList = getValue(queryParam.getValues(), field, clazz);
-                    if (CollUtil.isNotEmpty(roLikeList)) {
-                        wrapper.and(consumer -> roLikeList.forEach(fullCodes -> consumer.or().like(fieldName, fullCodes)));
-                    }
-                    break;
-                default:
-                    break;
+            if (isOr) {
+                wrapper.or(consumer -> {
+                    String log = doConditionsWrapper(condition.getConditions(), consumer, list, clazz, condition.isOr());
+                    logs.add(log);
+                });
+            } else {
+                wrapper.and(consumer -> {
+                    String log = doConditionsWrapper(condition.getConditions(), consumer, list, clazz, condition.isOr());
+                    logs.add(log);
+                });
             }
         }
+        return String.join(String.format(" %s ", isOr ? "OR" : "AND"), logs);
     }
 
     private static void paramLogger(QueryParam queryParam) {
